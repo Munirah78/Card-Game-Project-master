@@ -141,7 +141,7 @@ start.addEventListener("click", () => {
 
 
   cards.forEach(card => card.addEventListener('click', flipCard));
-  restart.addEventListener('click',function (event))
+  restart.addEventListener('click',function ())
   {
     stopTimer();
     timerOut = true;
