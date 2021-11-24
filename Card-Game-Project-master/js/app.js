@@ -52,6 +52,7 @@ function startGame(){
     //reset timer
     initClock();
     flipCard();
+    //test
 }
 
 function flipCard() {
