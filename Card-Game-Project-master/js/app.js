@@ -13,15 +13,50 @@ array[randomIndex] = temporaryValue;
 return array;
 }
 const cards = document.querySelectorAll('.card');
+const restart =document.getElementById('.restart');
 
 let hasFlippedCard = false;
 let lockBoard = false;
 let firstCard, secondCard;
 
-function flipCard() {
-    if (lockBoard) return;
-    if (this === firstCard) return;
+let time = 0;
+let timerOut = true;
+let timerId;
+
+let moves = 0;
+let counter = document.getElementById(".moves");
+
+const stars = document.querySelectorAll(".heart");
+let heartList = document.querySelectorAll(".bi-heart-fill");
+
+var openedCards = [];
+
+
+document.body.onload = startGame();
+
+function startGame(){
+ 
+   
+    openedCards = [];
+
+   
+    cards = shuffle(cards);
   
+    moves = 0;
+    counter.innerHTML = moves;
+    // reset rating
+    for (var i= 0; i < stars.length; i++){
+        
+        stars[i].style.visibility = "visible";
+    }
+    //reset timer
+    initClock();
+    flipCard();
+}
+
+function flipCard() {
+
+    this.classList.toggle("open");
     this.classList.add('flip');
   
     if (!hasFlippedCard) {
@@ -66,6 +101,36 @@ function flipCard() {
     [firstCard, secondCard] = [null, null];
   }
 
+  const initClock = () => {
+    timerOut = false;
+    timerId = setInterval(() => {
+      time++;
+      timerCount();
+    }, 1000);
+  };
+
+  const timerCount = () => {
+    const timer = document.querySelector("#time-display");
+    const min = Math.floor(time / 60);
+    const sec = time % 60;
+    if (sec < 10) {
+      timer.innerHTML = `${min}:0${sec}`;
+    } else {
+      timer.innerHTML = `${min}:${sec}`;
+    }
+  };
+
+const stopTimer = () => {
+  clearInterval(timerId);
+};
+
+
+start.addEventListener("click", () => {
+  if (time == 0) {
+    initClock();
+    flipCard() ;
+  }
+});
 
 
 
@@ -76,4 +141,11 @@ function flipCard() {
 
 
   cards.forEach(card => card.addEventListener('click', flipCard));
-
+  restart.addEventListener('click',function (event))
+  {
+    stopTimer();
+    timerOut = true;
+    time = 0;
+    timerCount(); 
+    startGame();
+  };
