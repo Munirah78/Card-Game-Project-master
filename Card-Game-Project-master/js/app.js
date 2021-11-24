@@ -22,7 +22,7 @@ let firstCard, secondCard;
 let time = 0;
 let timerOut = true;
 let timerId;
-
+// var
 let moves = 0;
 let counter = document.getElementById(".moves");
 
