@@ -1,152 +1,169 @@
-
 function shuffle(array) {
-var currentIndex = array.length, temporaryValue, randomIndex;
+  var currentIndex = array.length, temporaryValue, randomIndex;
 
-while (0 !== currentIndex) {
-randomIndex = Math.floor(Math.random() * currentIndex);
-currentIndex -= 1;
-temporaryValue = array[currentIndex];
-array[currentIndex] = array[randomIndex];
-array[randomIndex] = temporaryValue;
+  while (currentIndex !== 0) {
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex -= 1;
+      temporaryValue = array[currentIndex];
+      array[currentIndex] = array[randomIndex];
+      array[randomIndex] = temporaryValue;
+  }
+
+  return array;
 }
 
-return array;
-}
-const cards = document.querySelectorAll('.card');
-const restart =document.getElementById('.restart');
-
-let hasFlippedCard = false;
-let lockBoard = false;
-let firstCard, secondCard;
-
-let time = 0;
+// variable
+const deck = document.querySelector("#deck");
+const stars = document.querySelectorAll("#heart li");
+const moves = document.querySelector("#moves");
+const timer = document.querySelector("#timer");
+const restart = document.querySelector("#restart");
+const cardToShuffle = document.querySelectorAll("#deck li");
+let arr = Array.from(cardToShuffle)
+let openCards = [];
+let movesCounter = 0;
 let timerOut = true;
-let timerId;
-// var
-let moves = 0;
-let counter = document.getElementById(".moves");
+let match = 0;
+let time = 0;
+let timerId = 0;
 
-const stars = document.querySelectorAll(".heart");
-let heartList = document.querySelectorAll(".bi-heart-fill");
-
-var openedCards = [];
-
-
-document.body.onload = startGame();
-
-function startGame(){
- 
-   
-    openedCards = [];
-
-   
-    cards = shuffle(cards);
+//function
+reShuffle()
+//==============================================
+function reShuffle(){
   
-    moves = 0;
-    counter.innerHTML = moves;
-    // reset rating
-    for (var i= 0; i < stars.length; i++){
-        
-        stars[i].style.visibility = "visible";
-    }
-    //reset timer
-    initClock();
-    flipCard();
-    //test
+  let shuffled =  shuffle(arr);
+  for(let card of shuffled){
+      deck.appendChild(card);
+  }
+}
+//==============================================
+
+function validClick(click){
+  return click.classList.contains("card")&&!click.classList.contains("match")&&!openCards.includes(click)&&openCards.length <2;
 }
 
-function flipCard() {
+//==============================================
+function addMove(){
+  movesCounter++;
+  moves.innerHTML = movesCounter;
+}
+//==============================================
+function resetMove(){
+  movesCounter=0;
+  moves.innerHTML = 0;
+}
+//==============================================
+function removeStars(){
+  if(movesCounter==8&&match<8){
+      stars[0].style.display = "none";
+  }
+  if(movesCounter==16&&match<8){
+  stars[1].style.display = "none";
+  }
+  if(movesCounter==24&&match<8){
+  stars[2].style.display = "none";
+  resetGame();
+  }
+}
+//=========================
+function resetStars(){
+  for(let star of stars){
+      if(star.style.display=="none"){
+          star.style.display="inline"
+      }
+  }
+}
 
-    this.classList.toggle("open");
-    this.classList.add('flip');
-  
-    if (!hasFlippedCard) {
-      // first click
-      hasFlippedCard = true;
-      firstCard = this;
-  
-      return;
-    }
-  
-    // second click
-    secondCard = this;
-  
-    checkForMatch();
+//==============================================
+function resetMatch(){
+  for(let item of deck.children){
+      item.classList.remove("match","open")
   }
-  function checkForMatch() {
-    let isMatch = firstCard.dataset.framework === secondCard.dataset.framework;
+}
+//==============================================
+function resetGame(){
+  stopTimer()
+  resetMove();
+  resetStars()
+  resetMatch()
+  reShuffle()
+  match=0;
+  openCards=[];
+}
+//==============================================
+function checkMatch(){
   
-    isMatch ? disableCards() : unflipCards();
-  }
-  
-  function disableCards() {
-    firstCard.removeEventListener('click', flipCard);
-    secondCard.removeEventListener('click', flipCard);
-  
-    resetBoard();
-  }
-  
-  function unflipCards() {
-    lockBoard = true;
-  
-    setTimeout(() => {
-      firstCard.classList.remove('flip');
-      secondCard.classList.remove('flip');
-  
-      resetBoard();
-    }, 1500);
-  }
-  
-  function resetBoard() {
-    [hasFlippedCard, lockBoard] = [false, false];
-    [firstCard, secondCard] = [null, null];
-  }
+  if(openCards[0].children[0].className === openCards[1].children[0].className){
+      openCards[0].classList.add("match");
+      openCards[1].classList.add("match");
+      openCards = [];
+      match++;
 
-  const initClock = () => {
-    timerOut = false;
-    timerId = setInterval(() => {
+      if(match==8){
+          setTimeout(() => {
+              win()
+      }, 1000); 
+      }
+  }
+  else{
+      setTimeout(()=>{
+          openCards[0].classList.toggle("open");
+          openCards[1].classList.toggle("open");
+          openCards = [];
+      },1000)
+  }
+}
+function win(){
+  alert('You Win')
+}
+
+//==============================================
+function timerCount(){
+
+      let min = Math.floor(time/60);
+      let sec = time%60;
       time++;
-      timerCount();
-    }, 1000);
-  };
-
-  const timerCount = () => {
-    const timer = document.querySelector("#time-display");
-    const min = Math.floor(time / 60);
-    const sec = time % 60;
-    if (sec < 10) {
-      timer.innerHTML = `${min}:0${sec}`;
-    } else {
-      timer.innerHTML = `${min}:${sec}`;
-    }
-  };
-
-const stopTimer = () => {
+      if(sec <10){
+          timer.innerHTML=`${min}:0${sec}`
+      }
+      else {
+          timer.innerHTML=`${min}:${sec}`
+      }
+}
+//==============================================
+function initTime(){
+timerOut = false;
+timerId = setInterval(() => {
+  timerCount();
+}, 1000);
+}
+// ======================================
+function stopTimer(){
+  timerOut = true;
   clearInterval(timerId);
-};
+  time=0;
+  timerCount();
+  
+}
+//==============================================
+deck.addEventListener("click",(event)=>{
+  target = event.target;
+  if(validClick(target)){
+      if(timerOut){
+          initTime();
+      }
+  target.classList.toggle("open")
+  openCards.push(target);
 
-
-start.addEventListener("click", () => {
-  if (time == 0) {
-    initClock();
-    flipCard() ;
+  if(openCards.length ==2){
+      checkMatch();
+      addMove();
+      if(movesCounter >= 8){
+          removeStars();
+      }
   }
-});
+ }
+})
 
-
-
-
-
-
-
-
-
-  cards.forEach(card => card.addEventListener('click', flipCard));
-  restart.addEventListener('click',function ())
-  {
-    stopTimer();
-    timerOut = true;
-    time = 0;
-    timerCount(); 
-    startGame();
-  };
+restart.addEventListener("click",resetGame);
